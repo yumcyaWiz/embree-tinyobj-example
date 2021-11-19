@@ -3,6 +3,8 @@
 #include <iostream>
 #include <limits>
 
+#include "core.h"
+
 int main() {
   RTCDevice device = rtcNewDevice(NULL);
   RTCScene scene = rtcNewScene(device);
