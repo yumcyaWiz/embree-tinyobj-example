@@ -5,6 +5,20 @@
 
 constexpr float RAY_EPS = 1e-5f;
 
+struct Vec2 {
+  float v[2];
+
+  Vec2() { v[0] = v[1] = 0; }
+  Vec2(float x) { v[0] = v[1] = x; }
+  Vec2(float x, float y) {
+    v[0] = x;
+    v[1] = y;
+  }
+
+  float operator[](int i) const { return v[i]; }
+  float& operator[](int i) { return v[i]; }
+};
+
 struct Vec3 {
   float v[3];
 

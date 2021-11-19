@@ -8,6 +8,6 @@
 
 int main() {
   Scene scene;
-  scene.addModel("asdf.obj");
+  scene.loadModel("CornellBox-Original.obj");
   return 0;
 }
