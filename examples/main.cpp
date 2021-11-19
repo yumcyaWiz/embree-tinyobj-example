@@ -20,7 +20,7 @@ int main() {
   Camera camera(camPos, camForward, FOV);
 
   Scene scene;
-  scene.loadModel("CornellBox-Original.obj");
+  scene.loadModel("test.obj");
   scene.build();
 
   for (uint32_t i = 0; i < height; ++i) {

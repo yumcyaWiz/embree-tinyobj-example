@@ -120,6 +120,8 @@ class Scene {
               attrib.vertices[3 * static_cast<size_t>(idx.vertex_index) + 2];
           vertices.push_back(Vec3(vx, vy, vz));
 
+          std::cout << vx << "," << vy << "," << vz << std::endl;
+
           if (idx.normal_index >= 0) {
             const tinyobj::real_t nx =
                 attrib.normals[3 * static_cast<size_t>(idx.normal_index) + 0];
@@ -210,7 +212,7 @@ class Scene {
     spdlog::info("[Scene] materials: {}", nMaterials());
   }
 
-  uint32_t nVertices() const { return indices.size(); }
+  uint32_t nVertices() const { return vertices.size() / 3; }
   uint32_t nFaces() const { return indices.size() / 3; }
   uint32_t nMaterials() const { return materials.size(); }
 
