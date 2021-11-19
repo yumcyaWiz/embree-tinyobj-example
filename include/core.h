@@ -3,6 +3,18 @@
 #include <cmath>
 #include <limits>
 
+constexpr float PI = 3.14159265359;
+
+constexpr float PI_MUL_2 = 2.0f * PI;
+constexpr float PI_MUL_4 = 4.0f * PI;
+
+constexpr float PI_DIV_2 = 0.5f * PI;
+constexpr float PI_DIV_4 = 0.25f * PI;
+
+constexpr float PI_INV = 1.0f / PI;
+constexpr float PI_MUL_2_INV = 1.0f / PI_MUL_2;
+constexpr float PI_MUL_4_INV = 1.0f / PI_MUL_4;
+
 constexpr float RAY_EPS = 1e-5f;
 
 struct Vec2 {
