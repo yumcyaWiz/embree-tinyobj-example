@@ -7,6 +7,9 @@ if(NOT OpenMP_CXX_FOUND)
   message(WARNING "failed to find OpenMP")
 endif()
 
+# externals
+add_subdirectory("externals")
+
 add_library(lib INTERFACE)
 target_include_directories(lib INTERFACE "include")
 target_compile_features(lib INTERFACE cxx_std_17)
