@@ -9,5 +9,6 @@
 int main() {
   Scene scene;
   scene.loadModel("CornellBox-Original.obj");
+  scene.build();
   return 0;
 }

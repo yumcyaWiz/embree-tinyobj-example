@@ -213,7 +213,33 @@ class Scene {
   uint32_t nFaces() const { return indices.size() / 3; }
   uint32_t nMaterials() const { return materials.size(); }
 
-  void build() const {}
+  void build() {
+    device = rtcNewDevice(NULL);
+    scene = rtcNewScene(device);
+
+    RTCGeometry geom = rtcNewGeometry(device, RTC_GEOMETRY_TYPE_TRIANGLE);
+
+    // set vertices
+    float* vb = (float*)rtcSetNewGeometryBuffer(
+        geom, RTC_BUFFER_TYPE_VERTEX, 0, RTC_FORMAT_FLOAT3, 3 * sizeof(float),
+        vertices.size() / 3);
+    for (int i = 0; i < vertices.size(); ++i) {
+      vb[i] = vertices[i];
+    }
+
+    // set indices
+    unsigned* ib = (unsigned*)rtcSetNewGeometryBuffer(
+        geom, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, 3 * sizeof(unsigned),
+        indices.size() / 3);
+    for (int i = 0; i < indices.size(); ++i) {
+      ib[i] = indices[i];
+    }
+
+    rtcCommitGeometry(geom);
+    rtcAttachGeometry(scene, geom);
+    rtcReleaseGeometry(geom);
+    rtcCommitScene(scene);
+  }
 
   bool intersect(const Ray& ray, IntersectInfo& info) const {
     RTCRayHit rayhit;
