@@ -4,6 +4,7 @@
 #include <limits>
 
 #include "core.h"
+#include "scene.h"
 
 int main() {
   RTCDevice device = rtcNewDevice(NULL);

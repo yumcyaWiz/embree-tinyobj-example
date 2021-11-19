@@ -9,29 +9,51 @@
 #include "core.h"
 #include "material.h"
 
-class Material {
- private:
-  const Vec3 kd;
-  const Vec3 ks;
-  const Vec3 ke;
-
-  Material(const Vec3& kd, const Vec3& ks, const Vec3& ke)
-      : kd(kd), ks(ks), ke(ke) {}
+struct MeshInfo {
+  unsigned int nVertices;        // number of vertices
+  unsigned int nFaces;           // number of faces
+  unsigned int normalsOffset;    // offset of normals array
+  unsigned int texcoordsOffset;  // offset of texcoords array
+  unsigned int tangentsOffset;   // offset of tangents array
+  unsigned int materialsOffset;  // offset of materials array
 };
 
 class Scene {
  private:
-  // material
-  std::vector<Material> materials;
-  // key: meshID, value: offset of materials
-  std::unordered_map<unsigned int, unsigned int> materialIDs;
-
   // embree
   RTCDevice device;
   RTCScene scene;
 
+  // triangles
+  std::vector<float> vertices;
+  std::vector<unsigned int> indices;
+  std::vector<float> normals;
+  std::vector<float> texcoords;
+  std::vector<float> tangents;
+
+  // mesh info
+  std::vector<MeshInfo> meshInfos;
+
  public:
   void addModel(const std::string& filepath) {}
+
+  unsigned int nVertices() const {
+    unsigned int ret = 0;
+    for (const auto& mi : meshInfos) {
+      ret += mi.nVertices;
+    }
+    return ret;
+  }
+
+  unsigned int nFaces() const {
+    unsigned int ret = 0;
+    for (const auto& mi : meshInfos) {
+      ret += mi.nFaces;
+    }
+    return ret;
+  }
+
+  unsigned int nMeshes() const { return meshInfos.size(); }
 
   void build() const {}
 
