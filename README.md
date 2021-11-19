@@ -1,6 +1,6 @@
 # embree-tinyobj-example
 
-minimal raytracing example of combination of embree and tinyobjloader.
+minimal raytracing example with a combination of embree and tinyobjloader
 
 ## Requirements
 
