@@ -41,10 +41,6 @@ struct Vertex {
 
 class Scene {
  private:
-  // embree
-  RTCDevice device;
-  RTCScene scene;
-
   // triangles
   // NOTE: size of normals, texcoords == size of vertices
   std::vector<float> vertices;
@@ -54,6 +50,10 @@ class Scene {
 
   // materials
   std::vector<Material> materials;
+
+  // embree
+  RTCDevice device;
+  RTCScene scene;
 
   // create material from tinyobj material
   static Material createMaterial(const tinyobj::material_t& material) {
@@ -67,6 +67,7 @@ class Scene {
   }
 
  public:
+  // load obj file
   void loadModel(const std::filesystem::path& filepath) {
     spdlog::info("[Scene] loading: {}", filepath.generic_string());
 
@@ -213,6 +214,7 @@ class Scene {
   uint32_t nFaces() const { return indices.size() / 3; }
   uint32_t nMaterials() const { return materials.size(); }
 
+  // setup embree
   void build() {
     device = rtcNewDevice(NULL);
     scene = rtcNewScene(device);
@@ -261,9 +263,8 @@ class Scene {
     if (rayhit.hit.geomID != RTC_INVALID_GEOMETRY_ID) {
       info.t = rayhit.ray.tfar;
       info.surfaceInfo.position = ray(info.t);
-
-      // compute shading normal
-
+      info.primID = rayhit.hit.primID;
+      info.material = &materials[rayhit.hit.primID];
       return true;
     } else {
       return false;

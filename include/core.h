@@ -133,11 +133,13 @@ struct SurfaceInfo {
 
 // forward declaration
 class Primitive;
+class Material;
 
 struct IntersectInfo {
   float t;
   SurfaceInfo surfaceInfo;
-  const Primitive* hitPrimitive;
+  uint32_t primID;
+  const Material* material;
 };
 
 #endif
