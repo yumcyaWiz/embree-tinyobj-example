@@ -21,16 +21,6 @@ class Material {
 
 class Scene {
  private:
-  // mesh
-  std::vector<float> vertices;
-  std::vector<unsigned int> indices;
-  std::vector<float> normals;
-  std::vector<float> texcoords;
-  std::vector<float> tangents;
-
-  // key: meshID, value: offset of vertices, indices, normals, ...
-  std::unordered_map<unsigned int, unsigned int> meshOffsets;
-
   // material
   std::vector<Material> materials;
   // key: meshID, value: offset of materials
@@ -45,7 +35,34 @@ class Scene {
 
   void build() const {}
 
-  bool intersect(const Ray& ray, IntersectInfo& info) const { return false; }
+  bool intersect(const Ray& ray, IntersectInfo& info) const {
+    RTCRayHit rayhit;
+    rayhit.ray.org_x = ray.origin[0];
+    rayhit.ray.org_y = ray.origin[1];
+    rayhit.ray.org_z = ray.origin[2];
+    rayhit.ray.dir_x = ray.direction[0];
+    rayhit.ray.dir_y = ray.direction[1];
+    rayhit.ray.dir_z = ray.direction[2];
+    rayhit.ray.tnear = ray.tmin;
+    rayhit.ray.tfar = ray.tmax;
+    rayhit.hit.geomID = RTC_INVALID_GEOMETRY_ID;
+
+    RTCIntersectContext context;
+    rtcInitIntersectContext(&context);
+
+    rtcIntersect1(scene, &context, &rayhit);
+
+    if (rayhit.hit.geomID != RTC_INVALID_GEOMETRY_ID) {
+      info.t = rayhit.ray.tfar;
+      info.surfaceInfo.position = ray(info.t);
+
+      // compute shading normal
+
+      return true;
+    } else {
+      return false;
+    }
+  }
 };
 
 #endif

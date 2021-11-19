@@ -90,7 +90,14 @@ inline float length(const Vec3& v) { return std::sqrt(dot(v, v)); }
 inline float length2(const Vec3& v) { return dot(v, v); }
 inline Vec3 normalize(const Vec3& v) { return v / length(v); }
 
-class Ray {
+struct AABB {
+ public:
+  Vec3 pMin;
+  Vec3 pMax;
+  AABB(const Vec3& pMin, const Vec3& pMax) : pMin(pMin), pMax(pMax) {}
+};
+
+struct Ray {
   Vec3 origin;
   Vec3 direction;
   static constexpr float tmin = RAY_EPS;
