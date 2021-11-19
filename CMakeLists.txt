@@ -4,7 +4,15 @@ project(embree-tinyobj-example LANGUAGES C CXX)
 # OpenMP
 find_package(OpenMP)
 if(NOT OpenMP_CXX_FOUND)
-  message(WARNING "failed to find OpenMP")
+  message(WARNING "Could not find OpenMP")
+endif()
+
+# Embree3
+find_package(embree 3.0 REQUIRED)
+if (${embree_FOUND})
+  message(STATUS "Found Embree")
+else()
+  message(FATAL_ERROR "Could not find Embree")
 endif()
 
 # externals
@@ -16,6 +24,7 @@ target_compile_features(lib INTERFACE cxx_std_17)
 set_target_properties(lib PROPERTIES CXX_EXTENSIONS OFF)
 
 target_link_libraries(lib INTERFACE OpenMP::OpenMP_CXX)
+target_link_libraries(lib INTERFACE embree)
 
 # examples
 add_subdirectory("examples")
