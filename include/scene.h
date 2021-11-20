@@ -120,8 +120,6 @@ class Scene {
               attrib.vertices[3 * static_cast<size_t>(idx.vertex_index) + 2];
           vertices.push_back(Vec3(vx, vy, vz));
 
-          std::cout << vx << "," << vy << "," << vz << std::endl;
-
           if (idx.normal_index >= 0) {
             const tinyobj::real_t nx =
                 attrib.normals[3 * static_cast<size_t>(idx.normal_index) + 0];
@@ -148,7 +146,7 @@ class Scene {
         // if normals is empty, add face normal
         if (normals.size() == 0) {
           const Vec3 v1 = normalize(vertices[1] - vertices[0]);
-          const Vec3 v2 = normalize(vertices[1] - vertices[0]);
+          const Vec3 v2 = normalize(vertices[2] - vertices[0]);
           const Vec3 n = normalize(cross(v1, v2));
           normals.push_back(n);
           normals.push_back(n);
