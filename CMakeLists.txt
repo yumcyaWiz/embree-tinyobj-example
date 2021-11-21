@@ -35,3 +35,8 @@ target_link_libraries(lib INTERFACE tinyobjloader)
 
 # examples
 add_subdirectory("examples")
+
+# tests
+if(BUILD_TESTS)
+    add_subdirectory(tests)
+endif()
