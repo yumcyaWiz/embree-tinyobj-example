@@ -11,6 +11,17 @@
 #include "material.h"
 #include "tiny_obj_loader.h"
 
+// create material from tinyobj material
+Material createMaterial(const tinyobj::material_t& material) {
+  const Vec3 kd =
+      Vec3(material.diffuse[0], material.diffuse[1], material.diffuse[2]);
+  const Vec3 ks =
+      Vec3(material.specular[0], material.specular[1], material.specular[2]);
+  const Vec3 ke =
+      Vec3(material.emission[0], material.emission[1], material.emission[2]);
+  return Material(kd, ks, ke);
+}
+
 class Scene {
  private:
   // triangles
@@ -27,21 +38,15 @@ class Scene {
   RTCDevice device;
   RTCScene scene;
 
-  // create material from tinyobj material
-  static Material createMaterial(const tinyobj::material_t& material) {
-    const Vec3 kd =
-        Vec3(material.diffuse[0], material.diffuse[1], material.diffuse[2]);
-    const Vec3 ks =
-        Vec3(material.specular[0], material.specular[1], material.specular[2]);
-    const Vec3 ke =
-        Vec3(material.emission[0], material.emission[1], material.emission[2]);
-    return Material(kd, ks, ke);
-  }
-
   // return vertex normal
   Vec3 getVertexNormal(uint32_t vertexID) const {
     return Vec3(normals[3 * vertexID + 0], normals[3 * vertexID + 1],
                 normals[3 * vertexID + 2]);
+  }
+
+  // return vertex texcoords
+  Vec2 getVertexTexcoords(uint32_t vertexID) const {
+    return Vec2(texcoords[2 * vertexID + 0], texcoords[2 * vertexID + 1]);
   }
 
   // return vertex indices of specified face
@@ -59,13 +64,24 @@ class Scene {
     return ret;
   }
 
-  // compute normal of specified face
-  Vec3 getFaceNormal(uint32_t faceID, const Vec2& uv) const {
+  // compute normal of specified face, barycentric
+  Vec3 getFaceNormal(uint32_t faceID, const Vec2& barycentric) const {
     const VertexIndices vidx = getIndices(faceID);
     const Vec3 n1 = getVertexNormal(vidx.v1idx);
     const Vec3 n2 = getVertexNormal(vidx.v2idx);
     const Vec3 n3 = getVertexNormal(vidx.v3idx);
-    return n1 * (1.0f - uv[0] - uv[1]) + n2 * uv[0] + n3 * uv[1];
+    return n1 * (1.0f - barycentric[0] - barycentric[1]) + n2 * barycentric[0] +
+           n3 * barycentric[1];
+  }
+
+  // compute texcoords of specified face, barycentric
+  Vec2 getTexcoords(uint32_t faceID, const Vec2& barycentric) const {
+    const VertexIndices vidx = getIndices(faceID);
+    const Vec2 t1 = getVertexTexcoords(vidx.v1idx);
+    const Vec2 t2 = getVertexTexcoords(vidx.v2idx);
+    const Vec2 t3 = getVertexTexcoords(vidx.v3idx);
+    return t1 * (1.0f - barycentric[0] - barycentric[1]) + t2 * barycentric[0] +
+           t3 * barycentric[1];
   }
 
   void clear() {
@@ -254,8 +270,10 @@ class Scene {
 
       info.surfaceInfo.position = ray(info.t);
       info.surfaceInfo.barycentric = Vec2(rayhit.hit.u, rayhit.hit.v);
+      info.surfaceInfo.texcoords =
+          getTexcoords(rayhit.hit.primID, info.surfaceInfo.barycentric);
       info.surfaceInfo.normal =
-          getFaceNormal(rayhit.hit.primID, Vec2(rayhit.hit.u, rayhit.hit.v));
+          getFaceNormal(rayhit.hit.primID, info.surfaceInfo.barycentric);
       orthonormalBasis(info.surfaceInfo.normal, info.surfaceInfo.dpdu,
                        info.surfaceInfo.dpdv);
 
