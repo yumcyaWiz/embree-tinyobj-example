@@ -159,10 +159,10 @@ class Scene {
           if (idx.texcoord_index >= 0) {
             const tinyobj::real_t tx =
                 attrib
-                    .texcoords[3 * static_cast<size_t>(idx.texcoord_index) + 0];
+                    .texcoords[2 * static_cast<size_t>(idx.texcoord_index) + 0];
             const tinyobj::real_t ty =
                 attrib
-                    .texcoords[3 * static_cast<size_t>(idx.texcoord_index) + 1];
+                    .texcoords[2 * static_cast<size_t>(idx.texcoord_index) + 1];
             texcoords.push_back(Vec2(tx, ty));
           }
         }
