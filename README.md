@@ -22,7 +22,7 @@ make
 
 ## Run
 
-Download `.obj` from (McGuire Computer Graphics Archive)[http://casual-effects.com/data/)] and run `examples/main.cpp`
+Download `.obj` from [McGuire Computer Graphics Archive](http://casual-effects.com/data/) and run `examples/main.cpp`
 
 ## Structure
 
