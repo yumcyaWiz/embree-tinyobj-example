@@ -66,6 +66,11 @@ class Scene {
     return Material(kd, ks, ke);
   }
 
+  Vec3 getNormal(int faceID) const {
+    return Vec3(normals[3 * faceID + 0], normals[3 * faceID + 1],
+                normals[3 * faceID + 2]);
+  }
+
  public:
   // load obj file
   void loadModel(const std::filesystem::path& filepath) {
@@ -161,6 +166,7 @@ class Scene {
         }
 
         // populate vertices, indices, normals, texcoords array
+        /*
         for (int i = 0; i < 3; ++i) {
           Vertex vertex;
           vertex.vertex[0] = vertices[i][0];
@@ -195,6 +201,23 @@ class Scene {
 
           this->indices.push_back(uniqueVertices[key]);
         }
+        */
+
+        for (int i = 0; i < 3; ++i) {
+          this->vertices.push_back(vertices[i][0]);
+          this->vertices.push_back(vertices[i][1]);
+          this->vertices.push_back(vertices[i][2]);
+
+          this->normals.push_back(normals[i][0]);
+          this->normals.push_back(normals[i][1]);
+          this->normals.push_back(normals[i][2]);
+
+          this->texcoords.push_back(texcoords[i][0]);
+          this->texcoords.push_back(texcoords[i][1]);
+
+          this->indices.push_back(this->indices.size());
+        }
+
         index_offset += fv;
 
         // add material
@@ -222,9 +245,9 @@ class Scene {
     RTCGeometry geom = rtcNewGeometry(device, RTC_GEOMETRY_TYPE_TRIANGLE);
 
     // set vertices
-    float* vb = (float*)rtcSetNewGeometryBuffer(
-        geom, RTC_BUFFER_TYPE_VERTEX, 0, RTC_FORMAT_FLOAT3, 3 * sizeof(float),
-        vertices.size() / 3);
+    float* vb = (float*)rtcSetNewGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX, 0,
+                                                RTC_FORMAT_FLOAT3,
+                                                3 * sizeof(float), nVertices());
     for (int i = 0; i < vertices.size(); ++i) {
       vb[i] = vertices[i];
     }
@@ -232,7 +255,7 @@ class Scene {
     // set indices
     unsigned* ib = (unsigned*)rtcSetNewGeometryBuffer(
         geom, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, 3 * sizeof(unsigned),
-        indices.size() / 3);
+        nFaces());
     for (int i = 0; i < indices.size(); ++i) {
       ib[i] = indices[i];
     }
@@ -262,8 +285,11 @@ class Scene {
 
     if (rayhit.hit.geomID != RTC_INVALID_GEOMETRY_ID) {
       info.t = rayhit.ray.tfar;
-      info.surfaceInfo.position = ray(info.t);
       info.primID = rayhit.hit.primID;
+
+      info.surfaceInfo.position = ray(info.t);
+      info.surfaceInfo.normal = getNormal(rayhit.hit.primID);
+
       info.material = &materials[rayhit.hit.primID];
       return true;
     } else {
