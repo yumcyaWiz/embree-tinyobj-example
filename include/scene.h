@@ -5,7 +5,6 @@
 
 #include <filesystem>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 #include "core.h"
@@ -66,14 +65,50 @@ class Scene {
     return Material(kd, ks, ke);
   }
 
-  Vec3 getNormal(int faceID) const {
-    return Vec3(normals[3 * faceID + 0], normals[3 * faceID + 1],
-                normals[3 * faceID + 2]);
+  // return vertex normal
+  Vec3 getVertexNormal(uint32_t vertexID) const {
+    return Vec3(normals[3 * vertexID + 0], normals[3 * vertexID + 1],
+                normals[3 * vertexID + 2]);
+  }
+
+  // return vertex indices of specified face
+  // TODO: use Vec3i
+  struct VertexIndices {
+    uint32_t v1idx;
+    uint32_t v2idx;
+    uint32_t v3idx;
+  };
+  VertexIndices getIndices(uint32_t faceID) const {
+    VertexIndices ret;
+    ret.v1idx = indices[3 * faceID + 0];
+    ret.v2idx = indices[3 * faceID + 1];
+    ret.v3idx = indices[3 * faceID + 2];
+    return ret;
+  }
+
+  // compute normal of specified face
+  Vec3 getFaceNormal(uint32_t faceID, const Vec2& uv) const {
+    const VertexIndices vidx = getIndices(faceID);
+    const Vec3 n1 = getVertexNormal(vidx.v1idx);
+    const Vec3 n2 = getVertexNormal(vidx.v2idx);
+    const Vec3 n3 = getVertexNormal(vidx.v3idx);
+    return n1 * (1.0f - uv[0] - uv[1]) + n2 * uv[0] + n3 * uv[1];
+  }
+
+  void clear() {
+    vertices.clear();
+    indices.clear();
+    normals.clear();
+    texcoords.clear();
+    materials.clear();
   }
 
  public:
   // load obj file
+  // TODO: remove vertex duplication
   void loadModel(const std::filesystem::path& filepath) {
+    clear();
+
     spdlog::info("[Scene] loading: {}", filepath.generic_string());
 
     tinyobj::ObjReaderConfig reader_config;
@@ -132,7 +167,6 @@ class Scene {
                 attrib.normals[3 * static_cast<size_t>(idx.normal_index) + 1];
             const tinyobj::real_t nz =
                 attrib.normals[3 * static_cast<size_t>(idx.normal_index) + 2];
-
             normals.push_back(Vec3(nx, ny, nz));
           }
 
@@ -143,16 +177,21 @@ class Scene {
             const tinyobj::real_t ty =
                 attrib
                     .texcoords[3 * static_cast<size_t>(idx.texcoord_index) + 1];
-
             texcoords.push_back(Vec2(tx, ty));
           }
         }
 
-        // if normals is empty, add face normal
+        for (int i = 0; i < 3; ++i) {
+          spdlog::info("v{}: ({}, {}, {})", i, vertices[i][0], vertices[i][1],
+                       vertices[i][2]);
+        }
+
+        // if normals is empty, add geometric normal
         if (normals.size() == 0) {
           const Vec3 v1 = normalize(vertices[1] - vertices[0]);
           const Vec3 v2 = normalize(vertices[2] - vertices[0]);
           const Vec3 n = normalize(cross(v1, v2));
+          spdlog::info("n: ({}, {}, {})", n[0], n[1], n[2]);
           normals.push_back(n);
           normals.push_back(n);
           normals.push_back(n);
@@ -164,44 +203,6 @@ class Scene {
           texcoords.push_back(Vec2(1, 0));
           texcoords.push_back(Vec2(0, 1));
         }
-
-        // populate vertices, indices, normals, texcoords array
-        /*
-        for (int i = 0; i < 3; ++i) {
-          Vertex vertex;
-          vertex.vertex[0] = vertices[i][0];
-          vertex.vertex[1] = vertices[i][1];
-          vertex.vertex[2] = vertices[i][2];
-
-          vertex.normal[0] = normals[i][0];
-          vertex.normal[1] = normals[i][1];
-          vertex.normal[2] = normals[i][2];
-
-          vertex.texcoords[0] = texcoords[i][0];
-          vertex.texcoords[1] = texcoords[i][1];
-
-          // remove dupulicate
-          // https://vulkan-tutorial.com/Loading_models
-          // See Vertex deduplication section
-          const std::string key = vertex.toString();
-          if (uniqueVertices.count(key) == 0) {
-            uniqueVertices[key] = static_cast<uint32_t>(vertices.size());
-
-            this->vertices.push_back(vertex.vertex[0]);
-            this->vertices.push_back(vertex.vertex[1]);
-            this->vertices.push_back(vertex.vertex[2]);
-
-            this->normals.push_back(vertex.normal[0]);
-            this->normals.push_back(vertex.normal[1]);
-            this->normals.push_back(vertex.normal[2]);
-
-            this->texcoords.push_back(vertex.texcoords[0]);
-            this->texcoords.push_back(vertex.texcoords[1]);
-          }
-
-          this->indices.push_back(uniqueVertices[key]);
-        }
-        */
 
         for (int i = 0; i < 3; ++i) {
           this->vertices.push_back(vertices[i][0]);
@@ -218,13 +219,13 @@ class Scene {
           this->indices.push_back(this->indices.size());
         }
 
-        index_offset += fv;
-
         // add material
         // TODO: remove duplicate
         const int materialID = shapes[s].mesh.material_ids[f];
         const tinyobj::material_t& m = materials[materialID];
         this->materials.push_back(createMaterial(m));
+
+        index_offset += fv;
       }
     }
 
@@ -288,7 +289,8 @@ class Scene {
       info.primID = rayhit.hit.primID;
 
       info.surfaceInfo.position = ray(info.t);
-      info.surfaceInfo.normal = getNormal(rayhit.hit.primID);
+      info.surfaceInfo.normal =
+          getFaceNormal(rayhit.hit.primID, Vec2(rayhit.hit.u, rayhit.hit.v));
 
       info.material = &materials[rayhit.hit.primID];
       return true;
