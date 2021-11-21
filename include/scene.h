@@ -202,8 +202,10 @@ class Scene {
         // add material
         // TODO: remove duplicate
         const int materialID = shapes[s].mesh.material_ids[f];
-        const tinyobj::material_t& m = materials[materialID];
-        this->materials.push_back(createMaterial(m));
+        if (materialID != -1) {
+          const tinyobj::material_t& m = materials[materialID];
+          this->materials.push_back(createMaterial(m));
+        }
 
         index_offset += fv;
       }
