@@ -116,6 +116,15 @@ inline float length(const Vec3& v) { return std::sqrt(dot(v, v)); }
 inline float length2(const Vec3& v) { return dot(v, v); }
 inline Vec3 normalize(const Vec3& v) { return v / length(v); }
 
+inline void orthonormalBasis(const Vec3& n, Vec3& t, Vec3& b) {
+  if (std::abs(n[1]) < 0.9f) {
+    t = normalize(cross(n, Vec3(0, 1, 0)));
+  } else {
+    t = normalize(cross(n, Vec3(0, 0, -1)));
+  }
+  b = normalize(cross(t, n));
+}
+
 struct AABB {
  public:
   Vec3 pMin;

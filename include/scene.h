@@ -181,17 +181,11 @@ class Scene {
           }
         }
 
-        for (int i = 0; i < 3; ++i) {
-          spdlog::info("v{}: ({}, {}, {})", i, vertices[i][0], vertices[i][1],
-                       vertices[i][2]);
-        }
-
         // if normals is empty, add geometric normal
         if (normals.size() == 0) {
           const Vec3 v1 = normalize(vertices[1] - vertices[0]);
           const Vec3 v2 = normalize(vertices[2] - vertices[0]);
           const Vec3 n = normalize(cross(v1, v2));
-          spdlog::info("n: ({}, {}, {})", n[0], n[1], n[2]);
           normals.push_back(n);
           normals.push_back(n);
           normals.push_back(n);
@@ -291,6 +285,8 @@ class Scene {
       info.surfaceInfo.position = ray(info.t);
       info.surfaceInfo.normal =
           getFaceNormal(rayhit.hit.primID, Vec2(rayhit.hit.u, rayhit.hit.v));
+      orthonormalBasis(info.surfaceInfo.normal, info.surfaceInfo.dpdu,
+                       info.surfaceInfo.dpdv);
 
       info.material = &materials[rayhit.hit.primID];
       return true;
