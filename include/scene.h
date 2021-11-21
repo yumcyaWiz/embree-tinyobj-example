@@ -11,33 +11,6 @@
 #include "material.h"
 #include "tiny_obj_loader.h"
 
-struct Vertex {
-  float vertex[3];
-  float normal[3];
-  float texcoords[2];
-
-  Vertex() {
-    vertex[0] = vertex[1] = vertex[2] = 0;
-    normal[0] = normal[1] = normal[2] = 0;
-    texcoords[0] = texcoords[1] = texcoords[2] = 0;
-  }
-
-  bool operator==(const Vertex& v) const {
-    return vertex[0] == v.vertex[0] && vertex[1] == v.vertex[1] &&
-           vertex[2] == v.vertex[2] && normal[0] == v.normal[0] &&
-           normal[1] == v.normal[1] && normal[2] == v.normal[2] &&
-           texcoords[0] == v.texcoords[0] && texcoords[1] == v.texcoords[1];
-  }
-
-  // NOTE: used for unordered_map's key
-  std::string toString() const {
-    return std::to_string(vertex[0]) + "," + std::to_string(vertex[1]) + ", " +
-           std::to_string(vertex[2]) + "," + std::to_string(normal[0]) + "," +
-           std::to_string(normal[1]) + "," + std::to_string(normal[2]) + "," +
-           std::to_string(texcoords[0]) + "," + std::to_string(texcoords[1]);
-  }
-};
-
 class Scene {
  private:
   // triangles
@@ -131,9 +104,6 @@ class Scene {
     const auto& attrib = reader.GetAttrib();
     const auto& shapes = reader.GetShapes();
     const auto& materials = reader.GetMaterials();
-
-    // key: vertex string, value: start index of vertices
-    std::unordered_map<std::string, uint32_t> uniqueVertices;
 
     // loop over shapes
     for (size_t s = 0; s < shapes.size(); ++s) {
