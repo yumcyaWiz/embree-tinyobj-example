@@ -7,7 +7,7 @@ minimal raytracing example with a combination of embree and tinyobjloader
 ## Requirements
 
 * CMake (>=3.20)
-* [Embree3](https://github.com/embree/embree)
+* [Embree](https://github.com/embree/embree) (>=3)
 * OpenMP (Optional)
 
 ## Build
