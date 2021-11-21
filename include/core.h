@@ -150,6 +150,8 @@ struct SurfaceInfo {
   Vec3 normal;
   Vec3 dpdu;
   Vec3 dpdv;
+  Vec2 texcoords;
+  Vec2 barycentric;
 };
 
 // forward declaration

@@ -283,6 +283,7 @@ class Scene {
       info.primID = rayhit.hit.primID;
 
       info.surfaceInfo.position = ray(info.t);
+      info.surfaceInfo.barycentric = Vec2(rayhit.hit.u, rayhit.hit.v);
       info.surfaceInfo.normal =
           getFaceNormal(rayhit.hit.primID, Vec2(rayhit.hit.u, rayhit.hit.v));
       orthonormalBasis(info.surfaceInfo.normal, info.surfaceInfo.dpdu,
