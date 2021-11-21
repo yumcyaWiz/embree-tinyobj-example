@@ -220,6 +220,8 @@ struct IntersectInfo {
   SurfaceInfo surfaceInfo;
   uint32_t primID;
   const Material* material;
+
+  IntersectInfo() : t(0), primID(0), material(nullptr) {}
 };
 
 #endif

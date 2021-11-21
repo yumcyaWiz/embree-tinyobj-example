@@ -279,7 +279,9 @@ class Scene {
       orthonormalBasis(info.surfaceInfo.normal, info.surfaceInfo.dpdu,
                        info.surfaceInfo.dpdv);
 
-      info.material = &materials[rayhit.hit.primID];
+      if (materials.size() > 0) {
+        info.material = &materials[rayhit.hit.primID];
+      }
       return true;
     } else {
       return false;
